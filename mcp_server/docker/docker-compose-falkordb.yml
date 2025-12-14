@@ -1,10 +1,11 @@
 services:
   falkordb:
-    image: falkordb/falkordb:latest
+    image: falkordb/falkordb-server:latest
     ports:
       - "7009:6379" # Redis/FalkorDB port
       - "7010:3000" # FalkorDB web UI
     environment:
+      - REDIS_ARGS=--requirepass ${FALKORDB_PASSWORD}
       - FALKORDB_PASSWORD=${FALKORDB_PASSWORD}
       - BROWSER=${BROWSER:-1}  # Enable FalkorDB Browser UI (set to 0 to disable)
     volumes:
