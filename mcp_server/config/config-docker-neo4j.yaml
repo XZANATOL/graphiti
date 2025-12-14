@@ -9,8 +9,6 @@ server:
 llm:
   provider: "openai"  # Options: openai, azure_openai, anthropic, gemini, groq
   model: "gpt-oss:120b-cloud"
-  api_url: "http://157.173.100.177:11434/v1"
-  api_key: "XZANxATOL"
   max_tokens: 4096
   
   providers:
@@ -43,8 +41,6 @@ llm:
 embedder:
   provider: "openai"  # Options: openai, azure_openai, gemini, voyage
   model: "nomic-embed-text:latest"
-  api_url: "http://157.173.100.177:11434/v1"
-  api_key: "XZANxATOL"
   dimensions: 1536
   
   providers:
@@ -76,7 +72,7 @@ database:
   providers:
     neo4j:
       # Use environment variable if set, otherwise use Docker service hostname
-      uri: ${NEO4J_URI:bolt://neo4j:7687}
+      uri: ${NEO4J_URI:bolt://neo4j:7010}
       username: ${NEO4J_USER:neo4j}
       password: ${NEO4J_PASSWORD:demodemo}
       database: ${NEO4J_DATABASE:neo4j}
