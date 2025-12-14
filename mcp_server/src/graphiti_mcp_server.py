@@ -149,6 +149,8 @@ mcp = FastMCP(
     instructions=GRAPHITI_MCP_INSTRUCTIONS,
 )
 
+mcp.settings.transport_security = False
+
 # Global services
 graphiti_service: Optional['GraphitiService'] = None
 queue_service: QueueService | None = None
