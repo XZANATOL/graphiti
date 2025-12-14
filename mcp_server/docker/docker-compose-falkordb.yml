@@ -31,6 +31,9 @@ services:
       falkordb:
         condition: service_healthy
     environment:
+      - OPENAI_API_URL=${OPENAI_API_URL:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MODEL_NAME=${MODEL_NAME:-}
       # Database configuration
       - FALKORDB_URI=${FALKORDB_URI:-redis://falkordb:6379}
       - FALKORDB_PASSWORD=${FALKORDB_PASSWORD:-}
