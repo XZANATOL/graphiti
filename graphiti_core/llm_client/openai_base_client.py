@@ -140,10 +140,13 @@ class BaseOpenAIClient(LLMClient):
         openai_messages = self._convert_messages_to_openai_format(messages)
         model = self._get_model_for_size(model_size)
 
-        print(openai_messages)
+        # Detect whether we're talking to OpenAI or an OpenAI-compatible server (e.g., Ollama)
+        base_url = getattr(self.config, "base_url", None) or ""
+        is_openai = "api.openai.com" in base_url or base_url == ""
 
         try:
-            if response_model:
+            # Only use structured / Responses API for real OpenAI
+            if response_model and is_openai:
                 response = await self._create_structured_completion(
                     model=model,
                     messages=openai_messages,
@@ -155,6 +158,7 @@ class BaseOpenAIClient(LLMClient):
                 )
                 return self._handle_structured_response(response)
             else:
+                # For Ollama and other compat servers, use chat.completions + JSON
                 response = await self._create_completion(
                     model=model,
                     messages=openai_messages,
@@ -162,27 +166,6 @@ class BaseOpenAIClient(LLMClient):
                     max_tokens=max_tokens or self.max_tokens,
                 )
                 return self._handle_json_response(response)
-
-        except openai.LengthFinishReasonError as e:
-            raise Exception(f'Output length exceeded max tokens {self.max_tokens}: {e}') from e
-        except openai.RateLimitError as e:
-            raise RateLimitError from e
-        except openai.AuthenticationError as e:
-            logger.error(
-                f'OpenAI Authentication Error: {e}. Please verify your API key is correct.'
-            )
-            raise
-        except Exception as e:
-            # Provide more context for connection errors
-            error_msg = str(e)
-            if 'Connection error' in error_msg or 'connection' in error_msg.lower():
-                logger.error(
-                    f'Connection error communicating with OpenAI API. Please check your network connection and API key. Error: {e}'
-                )
-            else:
-                print(e)
-                logger.error(f'Error in generating LLM response: {e}')
-            raise
 
     async def generate_response(
         self,

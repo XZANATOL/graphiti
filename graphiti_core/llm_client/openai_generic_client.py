@@ -100,7 +100,6 @@ class OpenAIGenericClient(LLMClient):
         model_size: ModelSize = ModelSize.medium,
     ) -> dict[str, typing.Any]:
         openai_messages: list[ChatCompletionMessageParam] = []
-        print(openai_messages)
         for m in messages:
             m.content = self._clean_input(m.content)
             if m.role == 'user':
@@ -133,7 +132,6 @@ class OpenAIGenericClient(LLMClient):
         except openai.RateLimitError as e:
             raise RateLimitError from e
         except Exception as e:
-            print(e)
             logger.error(f'Error in generating LLM response: {e}')
             raise
 
