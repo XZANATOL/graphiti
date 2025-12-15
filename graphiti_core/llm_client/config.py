@@ -61,6 +61,7 @@ class LLMConfig:
                                                                 Defaults to "gpt-4.1-nano".
         """
         self.base_url = base_url
+        print(base_url)
         self.api_key = api_key
         self.model = model
         self.small_model = small_model

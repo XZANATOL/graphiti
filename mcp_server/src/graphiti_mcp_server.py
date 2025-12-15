@@ -855,6 +855,7 @@ async def initialize_server() -> ServerConfig:
 
     # Log configuration details
     logger.info('Using configuration:')
+    logger.info(f'  - Config: {config}')
     logger.info(f'  - LLM: {config.llm.provider} / {config.llm.model}')
     logger.info(f'  - Embedder: {config.embedder.provider} / {config.embedder.model}')
     logger.info(f'  - Database: {config.database.provider}')
