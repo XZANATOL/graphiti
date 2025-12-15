@@ -132,6 +132,7 @@ class OpenAIGenericClient(LLMClient):
         except openai.RateLimitError as e:
             raise RateLimitError from e
         except Exception as e:
+            print(e)
             logger.error(f'Error in generating LLM response: {e}')
             raise
 
