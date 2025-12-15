@@ -140,6 +140,8 @@ class BaseOpenAIClient(LLMClient):
         openai_messages = self._convert_messages_to_openai_format(messages)
         model = self._get_model_for_size(model_size)
 
+        print(openai_messages)
+
         try:
             if response_model:
                 response = await self._create_structured_completion(
