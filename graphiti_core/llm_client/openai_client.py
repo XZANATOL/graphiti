@@ -78,26 +78,17 @@ class OpenAIClient(BaseOpenAIClient):
             model.startswith('gpt-5') or model.startswith('o1') or model.startswith('o3')
         )
 
-        response = await self.client.chat.completions.create(
+        response = await self.client.responses.parse(
             model=model,
-            messages=messages,
+            input=messages,  # type: ignore
             temperature=temperature if not is_reasoning_model else None,
-            max_tokens=max_tokens,
-            response_format={"type": "json_object"},
+            max_output_tokens=max_tokens,
+            text_format=response_model,  # type: ignore
+            reasoning={'effort': reasoning} if reasoning is not None else None,  # type: ignore
+            text={'verbosity': verbosity} if verbosity is not None else None,  # type: ignore
         )
+
         return response
-
-        # response = await self.client.responses.parse(
-        #     model=model,
-        #     input=messages,  # type: ignore
-        #     temperature=temperature if not is_reasoning_model else None,
-        #     max_output_tokens=max_tokens,
-        #     text_format=response_model,  # type: ignore
-        #     reasoning={'effort': reasoning} if reasoning is not None else None,  # type: ignore
-        #     text={'verbosity': verbosity} if verbosity is not None else None,  # type: ignore
-        # )
-
-        # return response
 
     async def _create_completion(
         self,
