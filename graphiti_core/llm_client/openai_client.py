@@ -72,20 +72,41 @@ class OpenAIClient(BaseOpenAIClient):
         reasoning: str | None = None,
         verbosity: str | None = None,
     ):
-        """Create a structured completion using OpenAI's beta parse API."""
+        """Create a structured completion using OpenAI's API."""
         # Reasoning models (gpt-5 family) don't support temperature
         is_reasoning_model = (
             model.startswith('gpt-5') or model.startswith('o1') or model.startswith('o3')
         )
 
+        # Fallback for OpenAI-compatible servers (e.g., Ollama) that lack the Responses API
+        use_responses_api = True
+        try:
+            base_url = getattr(self.config, "base_url", None)
+            if base_url and "openai.com" not in base_url:
+                use_responses_api = False
+        except Exception:
+            use_responses_api = False
+
+        if not use_responses_api:
+            # Use chat/completions with JSON response format
+            response = await self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature if not is_reasoning_model else None,
+                max_tokens=max_tokens,
+                response_format={"type": "json_object"},
+            )
+            return response
+
+        # OpenAI Responses API (default)
         response = await self.client.responses.parse(
             model=model,
             input=messages,  # type: ignore
             temperature=temperature if not is_reasoning_model else None,
             max_output_tokens=max_tokens,
             text_format=response_model,  # type: ignore
-            reasoning={'effort': reasoning} if reasoning is not None else None,  # type: ignore
-            text={'verbosity': verbosity} if verbosity is not None else None,  # type: ignore
+            reasoning={"effort": reasoning} if reasoning is not None else None,  # type: ignore
+            text={"verbosity": verbosity} if verbosity is not None else None,  # type: ignore
         )
 
         return response
