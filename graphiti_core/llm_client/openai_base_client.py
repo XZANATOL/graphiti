@@ -125,27 +125,32 @@ class BaseOpenAIClient(LLMClient):
         else:
             raise Exception(f'Invalid response from LLM: {response_object.model_dump()}')
 
-    def _extract_json(text: str) -> str:
-        # Strip code fences and markdown, then grab the first {...} block
+    def _clean_json_text(text: str) -> str:
         stripped = text.strip()
-        # Remove ```...``` fences if present
+        # Remove fenced code blocks
         if stripped.startswith("```"):
             stripped = stripped.strip("`").strip()
-            # If a language tag is present, drop the first word
+            # Drop language hint if present
             parts = stripped.split("\n", 1)
-            if len(parts) == 2 and not parts[0].lstrip().startswith("{"):
+            if len(parts) == 2 and not parts[0].lstrip().startswith("{") and not parts[0].lstrip().startswith("["):
                 stripped = parts[1].strip()
-        # Find first JSON object
-        match = re.search(r"\{.*\}", stripped, re.DOTALL)
-        if match:
-            return match.group(0)
-        return stripped  # fall back to original
+        # Grab the first {...} or [...] block
+        m = re.search(r"\{.*\}|\[.*\]", stripped, re.DOTALL)
+        return m.group(0) if m else stripped
 
     def _handle_json_response(self, response: Any) -> dict[str, Any]:
-        """Handle JSON response parsing with markdown cleanup."""
+        """Handle JSON response parsing with cleanup/normalization."""
         result = response.choices[0].message.content or '{}'
-        cleaned = _extract_json(result)
-        return json.loads(cleaned)
+        cleaned = _clean_json_text(result)
+        data = json.loads(cleaned)
+
+        # Normalize common variants
+        if isinstance(data, list):
+            data = {"extracted_entities": data}
+        if isinstance(data, dict):
+            if "entities" in data and "extracted_entities" not in data:
+                data["extracted_entities"] = data.pop("entities")
+        return data
 
     async def _generate_response(
         self,
