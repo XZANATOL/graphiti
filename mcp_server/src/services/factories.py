@@ -129,7 +129,9 @@ class LLMClientFactory:
                     'gpt-5-nano' if is_reasoning_model else 'gpt-4.1-mini'
                 )  # Use reasoning model for small tasks if main model is reasoning
 
+
                 llm_config = CoreLLMConfig(
+                    base_url=config.api_url,
                     api_key=api_key,
                     model=config.model,
                     small_model=small_model,
