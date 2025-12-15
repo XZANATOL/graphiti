@@ -100,6 +100,7 @@ class OpenAIGenericClient(LLMClient):
         model_size: ModelSize = ModelSize.medium,
     ) -> dict[str, typing.Any]:
         openai_messages: list[ChatCompletionMessageParam] = []
+        print(openai_messages)
         for m in messages:
             m.content = self._clean_input(m.content)
             if m.role == 'user':
