@@ -19,7 +19,6 @@ import logging
 import typing
 from abc import abstractmethod
 from typing import Any, ClassVar
-import re
 
 import openai
 from openai.types.chat import ChatCompletionMessageParam
@@ -125,32 +124,12 @@ class BaseOpenAIClient(LLMClient):
         else:
             raise Exception(f'Invalid response from LLM: {response_object.model_dump()}')
 
-    def _clean_json_text(text: str) -> str:
-        stripped = text.strip()
-        # Remove fenced code blocks
-        if stripped.startswith("```"):
-            stripped = stripped.strip("`").strip()
-            # Drop language hint if present
-            parts = stripped.split("\n", 1)
-            if len(parts) == 2 and not parts[0].lstrip().startswith("{") and not parts[0].lstrip().startswith("["):
-                stripped = parts[1].strip()
-        # Grab the first {...} or [...] block
-        m = re.search(r"\{.*\}|\[.*\]", stripped, re.DOTALL)
-        return m.group(0) if m else stripped
-
     def _handle_json_response(self, response: Any) -> dict[str, Any]:
-        """Handle JSON response parsing with cleanup/normalization."""
+        """Handle JSON response parsing."""
+        print("LLM response")
+        print(response)
         result = response.choices[0].message.content or '{}'
-        cleaned = _clean_json_text(result)
-        data = json.loads(cleaned)
-
-        # Normalize common variants
-        if isinstance(data, list):
-            data = {"extracted_entities": data}
-        if isinstance(data, dict):
-            if "entities" in data and "extracted_entities" not in data:
-                data["extracted_entities"] = data.pop("entities")
-        return data
+        return json.loads(result)
 
     async def _generate_response(
         self,
