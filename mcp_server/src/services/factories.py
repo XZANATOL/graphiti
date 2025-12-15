@@ -139,7 +139,7 @@ class LLMClientFactory:
 
 
                 llm_config = CoreLLMConfig(
-                    base_url=config.base_url,
+                    base_url=base_url,
                     api_key=api_key,
                     model=config.model,
                     small_model=small_model,
