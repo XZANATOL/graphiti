@@ -126,8 +126,6 @@ class BaseOpenAIClient(LLMClient):
 
     def _handle_json_response(self, response: Any) -> dict[str, Any]:
         """Handle JSON response parsing."""
-        print("LLM response")
-        print(response)
         result = response.choices[0].message.content or '{}'
         return json.loads(result)
 
@@ -180,6 +178,7 @@ class BaseOpenAIClient(LLMClient):
                     f'Connection error communicating with OpenAI API. Please check your network connection and API key. Error: {e}'
                 )
             else:
+                print(e)
                 logger.error(f'Error in generating LLM response: {e}')
             raise
 
